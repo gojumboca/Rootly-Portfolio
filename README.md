@@ -94,7 +94,7 @@ Only the 9 anonymous metrics are sent to Claude — no raw transaction data, no 
 - HMAC-SHA256 email hashing for database lookups — emails stored encrypted, never in plaintext
 - Magic link tokens hashed with SHA-256 before storage
 - UFW firewall (SSH rate-limited, only 80/443 public)
-- Nginx security headers (HSTS preload, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- Nginx security headers (HSTS preload, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Content-Security-Policy)
 - SSH password authentication disabled
 - Monthly automated vulnerability scans (Lynis + npm audit)
 - AES-256 encrypted daily database backups
