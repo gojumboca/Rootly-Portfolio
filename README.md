@@ -40,7 +40,7 @@ Rootly breaks this cycle by giving newcomers a verifiable, behaviour-based finan
 
 ```
 rootly.ca          →  Static landing page (Nginx)
-app.rootly.ca      →  Static frontend + API proxy (Nginx → Node.js :4001)
+app.rootly.ca      →  Static frontend + API proxy (Nginx → Node.js backend)
                        ├── Magic link auth
                        ├── Plaid bank connect
                        ├── Score engine
@@ -94,12 +94,12 @@ Only the 9 anonymous metrics are sent to Claude — no raw transaction data, no 
 - HMAC-SHA256 email hashing for database lookups — emails stored encrypted, never in plaintext
 - Magic link tokens hashed with SHA-256 before storage
 - UFW firewall (SSH rate-limited, only 80/443 public)
-- Nginx security headers (HSTS preload, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Content-Security-Policy)
+- Nginx security headers (HSTS preload, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Content-Security-Policy with restricted connect-src)
 - SSH password authentication disabled
 - Monthly automated vulnerability scans (Lynis + npm audit)
 - AES-256 encrypted daily database backups
 - Anomalous access alerts (new IP/device detection)
-- Zero secrets in source code — all in systemd environment variables
+- Zero secrets in source code — secrets managed via OS-level environment configuration
 
 ### Score Features
 - Borrowell-style SVG line chart with score history
@@ -117,10 +117,10 @@ Only the 9 anonymous metrics are sent to Claude — no raw transaction data, no 
 ### Automated Jobs (Systemd timers)
 | Job | Schedule | Purpose |
 |---|---|---|
-| Score refresh | 1st & 15th monthly | Recalculates scores for all connected users |
-| Re-engagement | Daily 08:00 UTC | Emails users 7 days after bank disconnect |
-| Vulnerability scan | 1st monthly | Lynis + npm audit + security report |
-| DB backup | Daily 02:00 UTC | Encrypted SQLite backup, 7-day retention |
+| Score refresh | Bi-weekly | Recalculates scores for all connected users |
+| Re-engagement | Daily | Emails users 7 days after bank disconnect |
+| Vulnerability scan | Monthly | Lynis + npm audit + security report |
+| DB backup | Daily | Encrypted SQLite backup, 7-day retention |
 
 ### Email Notifications (Resend API)
 - Magic link login
@@ -141,17 +141,7 @@ Only the 9 anonymous metrics are sent to Claude — no raw transaction data, no 
 
 ## Database Schema
 
-9 SQLite tables, all sensitive columns encrypted:
-
-- `users` — encrypted email, first name (Plaid-sourced), HMAC hash
-- `magic_tokens` — SHA-256 hashed tokens, 15min expiry
-- `plaid_connections` — encrypted access token, item_id, first name
-- `score_cache` — encrypted metrics, breakdown, recommendations
-- `score_history` — score over time, max 12 entries per user
-- `disconnect_log` — tracks bank disconnects for re-engagement
-- `access_log` — security audit log
-- `known_ips` — device fingerprinting for anomaly detection
-- `passports` — (reserved for future use)
+SQLite database with multiple tables covering users, authentication tokens, bank connections, score data, and security audit logs. All sensitive columns encrypted with AES-256-GCM. Schema details not disclosed publicly.
 
 ---
 
