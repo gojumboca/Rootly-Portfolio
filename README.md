@@ -28,7 +28,7 @@ Rootly breaks this cycle by giving newcomers a verifiable, behaviour-based finan
 | Backend | Node.js v22 (no Express — pure http module) |
 | Database | SQLite with AES-256-GCM encryption at rest |
 | Auth | Passwordless magic link (JWT, httpOnly cookies) |
-| Bank Data | Plaid open banking API (production approved) |
+| Bank Data | Plaid open banking API (production approved, keys pending activation) |
 | AI Scoring | Anthropic Claude (recommendations only) |
 | Email | Resend API |
 | Infrastructure | Ubuntu 24.04, Nginx, Systemd, DigitalOcean |
@@ -90,11 +90,11 @@ Scoring weights: Income consistency 25% · Avg income 20% · Recurring payments 
 Only the 9 anonymous metrics are sent to Claude — no raw transaction data, no merchant names, no account numbers. Raw data is explicitly nulled after metric extraction.
 
 ### Security
-- All PII encrypted with AES-256-GCM (emails, names, Plaid tokens, score metrics)
-- HMAC-SHA256 email hashing for database lookups (no plaintext emails in DB)
+- All PII encrypted with AES-256-GCM (names, Plaid tokens, score metrics, email addresses)
+- HMAC-SHA256 email hashing for database lookups — emails stored encrypted, never in plaintext
 - Magic link tokens hashed with SHA-256 before storage
 - UFW firewall (SSH rate-limited, only 80/443 public)
-- Nginx security headers (HSTS preload, X-Frame-Options, CSP)
+- Nginx security headers (HSTS preload, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
 - SSH password authentication disabled
 - Monthly automated vulnerability scans (Lynis + npm audit)
 - AES-256 encrypted daily database backups
